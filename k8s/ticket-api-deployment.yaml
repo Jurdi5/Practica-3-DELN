@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: ticket-worker }
+  template:
+    metadata:
+      labels: { app: ticket-worker }
+    spec:
+      containers:
+        - name: ticket-worker
+          image: <cuenta>.dkr.ecr.<region>.amazonaws.com/ticket-worker:latest
+          env:
+            - { name: AWS_REGION, value: "us-east-1" }
+            - { name: SQS_QUEUE_URL, value: "<url-de-la-cola>.fifo" }
+            - { name: DYNAMODB_TABLE, value: "concerts" }
+            - { name: CHECKOUT_URL, value: "http://ticket-checkout:8080/checkout" }
+            - { name: DB_HOST, valueFrom: { secretKeyRef: { name: rds-credentials, key: host } } }
+            - { name: DB_NAME, valueFrom: { secretKeyRef: { name: rds-credentials, key: dbname } } }
+            - { name: DB_USER, valueFrom: { secretKeyRef: { name: rds-credentials, key: username } } }
+            - { name: DB_PASSWORD, valueFrom: { secretKeyRef: { name: rds-credentials, key: password } } }
